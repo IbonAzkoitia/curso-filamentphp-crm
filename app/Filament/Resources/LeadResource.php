@@ -17,7 +17,7 @@ class LeadResource extends Resource
 {
     protected static ?string $model = Lead::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-user';
 
     public static function form(Form $form): Form
     {
@@ -63,52 +63,83 @@ class LeadResource extends Resource
         return $table
             ->columns([
                 Tables\Columns\TextColumn::make('first_name')
+                    ->label('Nombre')
+                    ->formatStateUsing(function ($record) {
+                        return $record->first_name . ' ' . $record->last_name;
+                    })
+                    ->searchable(['first_name', 'last_name']),
+                Tables\Columns\TextColumn::make('account_name')
+                    ->label('Empresa')
                     ->searchable(),
-                Tables\Columns\TextColumn::make('last_name')
+                Tables\Columns\TextColumn::make('account_size.name')
+                    ->label('Tamaño')
+                    ->searchable(),
+                Tables\Columns\TextColumn::make('job_title')
+                    ->label('Puesto')
                     ->searchable(),
                 Tables\Columns\TextColumn::make('email')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('leadStatus.name')
+                    ->label('Estado')
+                    ->formatStateUsing(function ($record) {
+                        return view('lead.leadStatusList', ['leadStatus' => $record->leadStatus])->render();
+                    })
+                    ->html()
                     ->searchable(),
                 Tables\Columns\TextColumn::make('phone')
-                    ->searchable(),
-                Tables\Columns\ImageColumn::make('image'),
-                Tables\Columns\TextColumn::make('job_title')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('lead_status_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('source_id')
-                    ->numeric()
-                    ->sortable(),
+                    ->label('Teléfono')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('description')
+                    ->label('Descripción')
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('source.name')
+                    ->label('Fuente del Lead')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('url_linkedin')
-                    ->searchable(),
+                    ->label('LinkedIn')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('url_website')
-                    ->searchable(),
+                    ->label('Página web')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('url_x')
-                    ->searchable(),
+                    ->label('X')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('street')
-                    ->searchable(),
+                    ->label('Calle')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('city')
-                    ->searchable(),
+                    ->label('Ciudad')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('state')
-                    ->searchable(),
+                    ->label('Provincia')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('postcode')
-                    ->searchable(),
+                    ->label('Código postal')
+                    ->numeric()
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('country')
-                    ->searchable(),
-                Tables\Columns\TextColumn::make('account_name')
-                    ->searchable(),
+                    ->label('Ciudad')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('account_revenue')
+                    ->label('Facturación')
                     ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('account_size_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('industry_id')
-                    ->numeric()
-                    ->sortable(),
-                Tables\Columns\TextColumn::make('partner_id')
-                    ->numeric()
-                    ->sortable(),
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
+                Tables\Columns\TextColumn::make('account_industry')
+                    ->label('Industria')
+                    ->searchable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('created_at')
                     ->dateTime()
                     ->sortable()
