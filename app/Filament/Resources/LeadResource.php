@@ -6,11 +6,13 @@ use App\Filament\Resources\LeadResource\Pages;
 use App\Filament\Resources\LeadResource\RelationManagers;
 use App\Models\Lead;
 use Filament\Forms;
+use Filament\Forms\Components\Wizard;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 
 class LeadResource extends Resource
@@ -23,39 +25,93 @@ class LeadResource extends Resource
     {
         return $form
             ->schema([
-                Forms\Components\TextInput::make('first_name'),
-                Forms\Components\TextInput::make('last_name'),
-                Forms\Components\TextInput::make('email')
-                    ->email(),
-                Forms\Components\TextInput::make('phone')
-                    ->tel(),
-                Forms\Components\Textarea::make('description')
-                    ->columnSpanFull(),
-                Forms\Components\FileUpload::make('image')
-                    ->image(),
-                Forms\Components\TextInput::make('job_title'),
-                Forms\Components\TextInput::make('lead_status_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('source_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('url_linkedin'),
-                Forms\Components\TextInput::make('url_website'),
-                Forms\Components\TextInput::make('url_x'),
-                Forms\Components\TextInput::make('street'),
-                Forms\Components\TextInput::make('city'),
-                Forms\Components\TextInput::make('state'),
-                Forms\Components\TextInput::make('postcode'),
-                Forms\Components\TextInput::make('country'),
-                Forms\Components\TextInput::make('account_name'),
-                Forms\Components\TextInput::make('account_revenue')
-                    ->numeric(),
-                Forms\Components\TextInput::make('account_size_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('industry_id')
-                    ->numeric(),
-                Forms\Components\TextInput::make('partner_id')
-                    ->numeric(),
-            ]);
+                Wizard::make([
+                    Wizard\Step::make('Info')
+                        ->columns(2)
+                        ->schema([
+                            Forms\Components\FileUpload::make('image')
+                                ->label('Foto')
+                                ->directory('contacts')
+                                ->preserveFilenames()
+                                ->avatar()
+                                ->imageEditor()
+                                ->circleCropper()
+                                ->maxSize(1024)
+                                ->columnSpan(2),
+                            Forms\Components\TextInput::make('first_name')
+                                ->label('Nombre'),
+                            Forms\Components\TextInput::make('last_name')
+                                ->label('Apellidos'),
+                            Forms\Components\TextInput::make('email')
+                                ->email(),
+                            Forms\Components\TextInput::make('phone')
+                                ->label('Teléfono'),
+                            Forms\Components\Textarea::make('description')
+                                ->label('Descripción'),
+                            Forms\Components\TextInput::make('job_title')
+                                ->label('Puesto'),
+                            Forms\Components\Select::make('lead_status_id')
+                                ->label('Status')
+                                ->default(1)
+                                ->relationship(
+                                    name: 'leadStatus',
+                                    modifyQueryUsing: fn (Builder $query) => $query->orderBy('id')
+                                )
+                                ->getOptionLabelFromRecordUsing(fn (Model $record) => "{$record->name}"),
+                            Forms\Components\Select::make('source_id')
+                                ->label('Fuente del Lead')
+                                ->relationship('source', 'name')
+                        ]),
+                    Wizard\Step::make('Social Media')
+                        ->columns(2)
+                        ->schema([
+                            Forms\Components\TextInput::make('url_linkedin')
+                                ->label('LinkedIn')
+                                ->url()
+                                ->placeholder('https://linkedin.com/'),
+                            Forms\Components\TextInput::make('url_website')
+                                ->label('Página web')
+                                ->url()
+                                ->placeholder('https://prolinks.pro'),
+                            Forms\Components\TextInput::make('url_x')
+                                ->label('X')
+                                ->url()
+                                ->placeholder('https://x.com'),
+                        ]),
+                    Wizard\Step::make('Dirección')
+                        ->columns(2)
+                        ->schema([
+                            Forms\Components\TextInput::make('street')
+                                ->label('Calle'),
+                            Forms\Components\TextInput::make('city')
+                                ->label('Ciudad'),
+                            Forms\Components\TextInput::make('state')
+                                ->label('Provincia'),
+                            Forms\Components\TextInput::make('postcode')
+                                ->label('Código postal'),
+                            Forms\Components\TextInput::make('country')
+                                ->label('País'),
+                        ]),
+                    Wizard\Step::make('Empresa')
+                        ->columns(2)
+                        ->schema([
+                            Forms\Components\TextInput::make('account_name')
+                                ->label('Empresa'),
+                            Forms\Components\TextInput::make('account_revenue')
+                                ->label('Facturación')
+                                ->numeric(),
+                            Forms\Components\Select::make('account_size_id')
+                                ->label('Tamaño de la empresa')
+                                ->relationship('account_size', 'name'),
+                            Forms\Components\Select::make('industry_id')
+                                ->label('Industria')
+                                ->relationship('industry', 'name'),
+                        ])
+                        
+                ])
+                ->columnSpan(3),
+            ])
+            ->columns(4);
     }
 
     public static function table(Table $table): Table
