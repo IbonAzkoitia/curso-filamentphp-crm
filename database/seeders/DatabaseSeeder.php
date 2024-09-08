@@ -81,7 +81,8 @@ class DatabaseSeeder extends Seeder
         }
 
         $this->call([
-            LeadSeeder::class
+            LeadSeeder::class,
+            ContactSeeder::class
         ]);
     }
 }
